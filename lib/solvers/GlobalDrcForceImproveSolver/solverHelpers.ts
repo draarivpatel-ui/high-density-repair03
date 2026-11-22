@@ -3934,6 +3934,9 @@ export const applySafeTraceLayerMoveForError = (
   }
 
   const route = routes[routeIndex]
+  if (route?.allowedZLayers && !route.allowedZLayers.includes(targetZ)) {
+    return false
+  }
   if (!route || route.route.length < 2) return false
 
   const originalPoints = route.route.map((point) => ({ ...point }))
@@ -4181,6 +4184,9 @@ export const applyViaInPadLayerMoveForError = (
   const routeIndex = getTraceRouteIndexForError(error, traceRouteIndexById)
   if (routeIndex === undefined) return false
   const route = routes[routeIndex]
+  if (route?.allowedZLayers && !route.allowedZLayers.includes(targetZ)) {
+    return false
+  }
   if (!route || route.route.length < 2) return false
 
   const first = route.route[0]
@@ -4822,6 +4828,9 @@ export const applyTracePairLayerMoveForError = (
   const selection = getTraceSegmentForError(routes, error, routeIndex)
   if (!selection || selection.segment.z === targetZ) return false
   const { route, segment } = selection
+  if (route?.allowedZLayers && !route.allowedZLayers.includes(targetZ)) {
+    return false
+  }
 
   let spanStartIndex = segment.startIndex
   let spanEndIndex = segment.endIndex
@@ -4946,6 +4955,9 @@ export const applyTraceLayerCorridorForError = (
   }
   const center = getErrorCenter(error)
   const route = routes[routeIndex]
+  if (route?.allowedZLayers && !route.allowedZLayers.includes(targetZ)) {
+    return false
+  }
   const start = route?.route[0]
   const end = route?.route.at(-1)
   if (

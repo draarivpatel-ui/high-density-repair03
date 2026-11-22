@@ -257,6 +257,12 @@ export function* getPeerTraceRepairCandidates({
             for (const after of distances)
               for (let targetZ = 0; targetZ < srj.layerCount; targetZ++) {
                 if (targetZ === z) continue
+                if (
+                  route.allowedZLayers &&
+                  !route.allowedZLayers.includes(targetZ)
+                ) {
+                  continue
+                }
                 const start = locateAlongRoute(route, startPosition, -1, before)
                 const end = locateAlongRoute(route, endPosition, 1, after)
                 if (!start || !end || start.index > end.index) continue
