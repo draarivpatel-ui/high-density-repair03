@@ -42,5 +42,11 @@ test("repair the USB ground trace beside MCU pin 15", async () => {
       (connection) => connection.name === ground.connectionName,
     ),
   }
-  await expectSrjRepairSnapshot(view, [ground], [output], import.meta.path)
+  await expectSrjRepairSnapshot(
+    view,
+    [ground],
+    [output],
+    import.meta.path,
+    solver.stats.finalDrcIssueCount,
+  )
 })
