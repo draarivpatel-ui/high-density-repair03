@@ -22,10 +22,19 @@ test("repair the USB ground trace beside MCU pin 15", async () => {
   })
   solver.solve()
   expect(solver.solved).toBe(true)
-  await expectSrjRepairSnapshot(
-    srj,
-    hdRoutes,
-    solver.getOutput(),
-    import.meta.path,
-  )
+  // Keep both routes in the solver, then zoom the snapshot to the USB ground escape.
+  const ground = hdRoutes.find(
+    (route) => route.connectionName === "source_net_0_mst46",
+  )!
+  const output = solver
+    .getOutput()
+    .find((route) => route.connectionName === ground.connectionName)!
+  const view = {
+    ...srj,
+    bounds: { minX: -3, maxX: 2, minY: -11, maxY: -5.5 },
+    connections: srj.connections.filter(
+      (connection) => connection.name === ground.connectionName,
+    ),
+  }
+  await expectSrjRepairSnapshot(view, [ground], [output], import.meta.path)
 })
