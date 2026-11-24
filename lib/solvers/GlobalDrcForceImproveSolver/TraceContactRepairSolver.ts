@@ -570,13 +570,14 @@ export class TraceContactRepairSolver extends BaseSolver {
         // Once the original DRC quality is recovered, do not polish every
         // stack. A same-count move can still be one step short of clearing a
         // pad, so keep moving only the stacks it moved while they remain in a
-        // DRC finding.
+        // DRC finding. Unattributed errors leave every moved stack eligible.
         const involvedRouteIndexes = getDrcInvolvedRouteIndexes(
           this.current!.snapshot,
         )
         const focusRouteIndexes = new Set(
-          movedRouteIndexes.filter((index) =>
-            involvedRouteIndexes?.has(index),
+          movedRouteIndexes.filter(
+            (index) =>
+              !involvedRouteIndexes || involvedRouteIndexes.has(index),
           ),
         )
         if (focusRouteIndexes.size > 0) this.startViaRound(focusRouteIndexes)
