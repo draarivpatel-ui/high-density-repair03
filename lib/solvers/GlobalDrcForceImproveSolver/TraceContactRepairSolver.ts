@@ -555,14 +555,11 @@ export class TraceContactRepairSolver extends BaseSolver {
         this.current = this.best
         this.startContactRound()
       } else if (this.best !== this.current) {
-        const countImproved =
-          this.best!.snapshot.count < this.current!.snapshot.count
         this.current = this.best
-        // Once the original DRC quality is recovered, do not spend more full
-        // board evaluations traversing a plateau solely to polish severity.
-        if (countImproved || this.current!.snapshot.count > this.targetDrcCount)
-          this.startViaRound()
-        else this.finish()
+        // A same-count move that lowers severity can be one step short of a
+        // stack position that clears a pad, so keep moving the repaired stacks.
+        // startViaRound stops at the round and candidate budgets.
+        this.startViaRound()
       } else this.finish()
       return
     }
