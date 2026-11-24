@@ -198,7 +198,7 @@ export class TraceContactRepairSolver extends BaseSolver {
     this.phase = "refine"
   }
 
-  private startViaRound(): void {
+  private startViaRound(focusRouteIndexes?: ReadonlySet<number>): void {
     this.guard.preserveClearedContacts(this.current!.routes)
     if (
       // Annulus repairs can move existing stacks as well as create bridges.
@@ -211,9 +211,8 @@ export class TraceContactRepairSolver extends BaseSolver {
       return
     }
     this.best = this.current
-    this.viaRefinementRouteIndexes = getDrcInvolvedRouteIndexes(
-      this.current!.snapshot,
-    )
+    this.viaRefinementRouteIndexes =
+      focusRouteIndexes ?? getDrcInvolvedRouteIndexes(this.current!.snapshot)
     this.candidateContactCheck = this.guard.prepareCandidateCheck(
       this.current!.routes,
     )
@@ -555,11 +554,33 @@ export class TraceContactRepairSolver extends BaseSolver {
         this.current = this.best
         this.startContactRound()
       } else if (this.best !== this.current) {
+        const countImproved =
+          this.best!.snapshot.count < this.current!.snapshot.count
+        const movedRouteIndexes = this.best!.routes.flatMap((route, index) =>
+          route === this.current!.routes[index] ? [] : [index],
+        )
         this.current = this.best
-        // A same-count move that lowers severity can be one step short of a
-        // stack position that clears a pad, so keep moving the repaired stacks.
-        // startViaRound stops at the round and candidate budgets.
-        this.startViaRound()
+        if (
+          countImproved ||
+          this.current!.snapshot.count > this.targetDrcCount
+        ) {
+          this.startViaRound()
+          return
+        }
+        // Once the original DRC quality is recovered, do not polish every
+        // stack. A same-count move can still be one step short of clearing a
+        // pad, so keep moving only the stacks it moved while they remain in a
+        // DRC finding.
+        const involvedRouteIndexes = getDrcInvolvedRouteIndexes(
+          this.current!.snapshot,
+        )
+        const focusRouteIndexes = new Set(
+          movedRouteIndexes.filter((index) =>
+            involvedRouteIndexes?.has(index),
+          ),
+        )
+        if (focusRouteIndexes.size > 0) this.startViaRound(focusRouteIndexes)
+        else this.finish()
       } else this.finish()
       return
     }
