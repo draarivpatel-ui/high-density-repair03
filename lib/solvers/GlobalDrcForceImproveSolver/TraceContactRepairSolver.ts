@@ -576,8 +576,7 @@ export class TraceContactRepairSolver extends BaseSolver {
         )
         const focusRouteIndexes = new Set(
           movedRouteIndexes.filter(
-            (index) =>
-              !involvedRouteIndexes || involvedRouteIndexes.has(index),
+            (index) => !involvedRouteIndexes || involvedRouteIndexes.has(index),
           ),
         )
         if (focusRouteIndexes.size > 0) this.startViaRound(focusRouteIndexes)
