@@ -3,8 +3,7 @@ name: Test
 on:
   push:
     branches:
-      - main
-  pull_request:
+      - linux-snapshot-generation
 
 jobs:
   test:
@@ -16,5 +15,8 @@ jobs:
           bun-version: 1.3.1
       - run: bun install --no-save
       - run: bun install --no-save --cwd tests/fixtures/usb-terminal-clearance
-      # The real Game Boy repair replay takes about 12 seconds on CI.
-      - run: bun test --timeout 30000
+      - run: BUN_UPDATE_SNAPSHOTS=1 bun test --timeout 30000 tests/srj18-sample9-pad-repair.test.ts
+      - uses: actions/upload-artifact@v4
+        with:
+          name: srj18-linux-snapshot
+          path: tests/__snapshots__/srj18-sample9-pad-repair-linux.snap.svg
